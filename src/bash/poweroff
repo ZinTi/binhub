@@ -1,0 +1,3 @@
+#!/bin/bash
+echo '(poweroff is aliased to `systemctl poweroff`)'
+systemctl poweroff

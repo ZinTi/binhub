@@ -1,0 +1,3 @@
+#!/bin/bash
+echo '(del is aliased to `rm -ri `)'
+rm -ri "$@"

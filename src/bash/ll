@@ -1,0 +1,3 @@
+#!/bin/bash
+echo '(ll is aliased to `ls -alF `)'
+ls -alF "$@"

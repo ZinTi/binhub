@@ -1,0 +1,51 @@
+常用命令手册
+（1）Windows系统原生命令
+# appwiz.cpl 程序和功能
+# bthprops.cpl
+# desk.cpl 设置-屏幕
+# Firewall.cpl 控制面板\系统和安全\Windows Defender防火墙
+# hdwwiz.cpl 设备管理器
+# inetcpl.cpl Internet属性
+# intl.cpl 区域
+# irprops.cpl
+# joy.cpl 游戏控制器
+# main.cpl 鼠标属性
+# mmsys.cpl 声音
+# ncpa.cpl 控制面板\网络和 Internet\网络连接
+# powercfg.cpl 控制面板\硬件和声音\电源选项
+# sapi.cpl 语音属性
+# sysdm.cpl 系统属性
+# TabletPC.cpl 笔和触控
+# telephon.cpl 位置信息
+# timedate.cpl 日期和时间
+# wscui.cpl 控制面板\系统和安全\安全和维护
+
+certmgr.msc 作用：系统认证证书编辑。
+ciadv.msc 作用：索引服务，链接文件*:\System Volume Information
+comexp.msc 所在文件夹：C:\WINDOWS\system32\Com 作用：组件服务，可以打开本地服务。
+compmgmt.msc 作用：本地计算机硬件和服务管理，功能很强大。
+devmgmt.msc 作用：设备管理器
+dfrg.msc 作用：磁盘碎片整理程序
+diskmgmt.msc 作用：磁盘管理器，可以修改盘符，格式化和分区等。
+eventvwr.msc 作用：事件查看器
+fsmgmt.msc 作用：共享文件夹管理
+gpedit.msc 作用：组策略管理器，功能强大。
+lusrmgr.msc 作用：本地用户和组管理器
+ntmsmgr.msc 作用：可移动存储管理器
+ntmsoprq.msc 作用：可移动存储管理员操作请求
+perfmon.msc 作用：性能察看管理器
+rsop.msc 作用：各种策略的结果集
+secpol.msc 作用：本地安全策略设置
+services.msc 作用：各项本地服务管理器
+wmimgmt.msc 作用：Windows管理体系结构（WMI）
+
+# 查询命令：Get-Command 命令名称 [/all]
+# 本地组策略编辑器： gpedit.msc
+# 屏幕键盘：osk
+# 注册表编辑器： regedit
+# 资源监视器：resmon
+# 更改终端/Shell字符集：UTF-8: chcp 65001, GBK(默认): chcp 936
+
+（2）用户自定义命令备忘
+#  np -> notepad
+ 
