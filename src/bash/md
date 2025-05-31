@@ -1,0 +1,3 @@
+#!/bin/bash
+echo '(md is aliased to `mkdir `)'
+mkdir "$@"

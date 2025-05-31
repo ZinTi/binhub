@@ -1,0 +1,28 @@
+#!/bin/bash
+#
+# 添加一些常用alias
+#
+
+# change directory 
+alias ~='cd ~'
+alias ..='cd ..'
+alias ...='cd ../../'
+# alias dev='cd /zin/zinti/'
+# alias shared='cd /zin/host/shared/'
+
+# text edit 
+alias vi='sudo vi'
+alias vim='sudo vim'
+
+# file and manager
+alias cp='sudo cp'
+alias mv='sudo mv'
+alias dir='sudo ls -alF --color=auto'
+alias ls='ls -aF --color=auto'
+alias ll='ls -alF --color=auto'
+alias systemctl='sudo systemctl'
+alias dnf='sudo dnf'
+alias apt='sudo apt'
+alias start='xdg-open'
+alias slay='pkill -f'
+alias chmod='sudo chmod'

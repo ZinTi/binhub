@@ -1,0 +1,3 @@
+[30;46mREAD-ONLY[0m [36mHere are two sentences for determining the console code page. If green text can be read normally, the current output text character set encoding is UTF-8; If purple text can be read normally, the character set encoding of the current output text is GBK.[0m
+[37;42m(1) ä½ å¥½ï¼ä¸–ç•Œã€‚å¦‚æœæˆ‘èƒ½æ­£å¸¸æ˜¾ç¤ºåˆ™Output CodePageä¸ºCP65001(UTF-8)ã€‚[0m
+[37;45m(2) ÄãºÃ£¡ÊÀ½ç¡£Èç¹ûÎÒÄÜÕı³£ÏÔÊ¾ÔòOutput CodePageÎªCP936(GBK)¡£[0m

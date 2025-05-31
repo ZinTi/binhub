@@ -1,0 +1,10 @@
+mstsc
+启用Windows Firewall:
+Win7是windows firewall
+Win10是windows defender filewall
+启动类型设置为“手动”或“自动”，状态设置为启动
+系统设置-启用远程桌面
+（
+win10:高级系统设置-允许远程协助连接这台计算机，允许远程连接到此计算机
+win7:远程连接-允许运行任意版本远程桌面的计算机连接
+）

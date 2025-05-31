@@ -1,0 +1,163 @@
+name: BinHub
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "main", "master" ]
+  pull_request:
+    branches: [ "main", "master" ]
+
+jobs:
+  build-library:
+    runs-on: ${{ matrix.os }} # 指定运行环境，使用矩阵变量os
+    strategy: # 定义构建策略
+      fail-fast: false # 设置fail-fast为false，即使矩阵中一个任务失败，其他任务也会继续执行
+      matrix:  # 定义矩阵策略，用于创建多个构建配置组合
+        os: [ubuntu-latest, windows-latest]
+        c_compiler: [gcc, clang, cl]
+        include: # 包含特定组合的列表（精确控制矩阵）
+          # Windows + MSVC
+          - os: windows-latest
+            c_compiler: cl
+            cpp_compiler: cl
+            generator: "Visual Studio 17 2022"
+            arch: "x64"
+          # Windows + MinGW
+          - os: windows-latest
+            c_compiler: gcc
+            cpp_compiler: g++
+            generator: "MinGW Makefiles"
+          # Linux + GCC
+          - os: ubuntu-latest
+            c_compiler: gcc
+            cpp_compiler: g++
+            generator: "Unix Makefiles"
+          # Linux + Clang
+          - os: ubuntu-latest
+            c_compiler: clang
+            cpp_compiler: clang++
+            generator: "Unix Makefiles"
+        exclude: # 排除不需要的组合
+          # 排除 Windows + Clang
+          - os: windows-latest
+            c_compiler: clang
+          # 排除 Ubuntu + MSVC
+          - os: ubuntu-latest
+            c_compiler: cl
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set reusable strings
+        id: strings
+        shell: bash
+        run: |
+            # github workspace path
+            workspace_dir="${{ github.workspace }}"       # 从GitHub上下文获取路径并标准化
+            workspace_dir="${workspace_dir//\\//}"        # 替换所有反斜杠为正斜杠
+            workspace_dir="${workspace_dir%/}"            # 移除路径末尾的斜杠（若有）
+
+            # github actions env
+            echo "WORKSPACE_DIR=$workspace_dir" >> "$GITHUB_OUTPUT"
+
+      - name: Download Prebuilt Libraries
+        shell: bash
+        run: |
+          cd ${{ steps.strings.outputs.WORKSPACE_DIR }}
+          mkdir third_party
+
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" && "${{ matrix.c_compiler }}" == "gcc" ]]; then
+            curl -L https://github.com/ZinTi/cpp-prebuilt-libs/releases/download/openssl/openssl-v3.5.4-20251021-linux-x86_64-gcc.tar.xz -O
+            tar -xf openssl-v3.5.4-20251021-linux-x86_64-gcc.tar.xz
+            rm openssl-v3.5.4-20251021-linux-x86_64-gcc.tar.xz
+            mv openssl-v3.5.4-20251021-linux-x86_64-gcc third_party/openssl
+
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" && "${{ matrix.c_compiler }}" == "clang" ]]; then
+            curl -L https://github.com/ZinTi/cpp-prebuilt-libs/releases/download/openssl/openssl-v3.5.4-20251021-linux-x86_64-clang.tar.xz -O
+            tar -xf openssl-v3.5.4-20251021-linux-x86_64-clang.tar.xz
+            rm openssl-v3.5.4-20251021-linux-x86_64-clang.tar.xz
+            mv openssl-v3.5.4-20251021-linux-x86_64-clang third_party/openssl
+
+          elif [[ "${{ matrix.c_compiler }}" == "cl" ]]; then
+            curl -L https://github.com/ZinTi/cpp-prebuilt-libs/releases/download/openssl/openssl-v3.5.4-20251021-windows-x86_64-msvc.7z -O
+            7z x openssl-v3.5.4-20251021-windows-x86_64-msvc.7z
+            rm openssl-v3.5.4-20251021-windows-x86_64-msvc.7z
+            mv openssl-v3.5.4-20251021-windows-x86_64-msvc third_party/openssl
+
+          else
+            curl -L https://github.com/ZinTi/cpp-prebuilt-libs/releases/download/openssl/openssl-v3.5.4-20251021-windows-x86_64-msys2.7z -O
+            7z x openssl-v3.5.4-20251021-windows-x86_64-msys2.7z
+            rm openssl-v3.5.4-20251021-windows-x86_64-msys2.7z
+            mv openssl-v3.5.4-20251021-windows-x86_64-msys2 third_party/openssl
+
+          fi
+
+      - name: Configure, Build, Install
+        shell: bash
+        run: |
+          cd ${{ steps.strings.outputs.WORKSPACE_DIR }}
+
+          if [[ "${{ matrix.os }}" == "ubuntu-latest" && "${{ matrix.c_compiler }}" == "gcc" ]]; then
+            sudo chmod 777 ./build-linux-gcc.sh 
+            ./build-linux-gcc.sh
+
+          elif [[ "${{ matrix.os }}" == "ubuntu-latest" && "${{ matrix.c_compiler }}" == "clang" ]]; then
+            sudo chmod 777 ./build-linux-clang.sh
+            ./build-linux-clang.sh
+          
+          elif [[ "${{ matrix.c_compiler }}" == "cl" ]]; then
+            ./build-windows-msvc.bat
+
+          else
+            ./build-windows-mingw.bat
+
+          fi
+
+      - name: Package
+        shell: bash
+        run: |
+          cd ${{ steps.strings.outputs.WORKSPACE_DIR }}
+
+          # 使用ls查找匹配的目录并获取第一个
+          dir_name=$(ls -d binhub-v* 2>/dev/null | head -n 1)
+
+          # 移除末尾的斜杠
+          if [[ -n "$dir_name" ]]; then
+            dir_name=${dir_name%/}
+            echo "找到匹配的目录: ${dir_name}"
+
+            if [ "$RUNNER_OS" == "Windows" ]; then
+              7z a -r ${dir_name}.7z ${dir_name}
+            else
+              tar -cJvf ${dir_name}.tar.xz ${dir_name}
+            fi
+
+          else
+            echo "错误：没有找到匹配的目录"
+          fi
+
+
+      # - name: Upload artifacts
+      #   uses: actions/upload-artifact@v4
+      #   with:
+      #     name: binhub-${{ matrix.os }}-${{ matrix.c_compiler }}
+      #     path: |
+      #       ${{ steps.strings.outputs.WORKSPACE_DIR }}/*.tar.xz
+      #       ${{ steps.strings.outputs.WORKSPACE_DIR }}/*.7z
+
+      - name: Upload to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v0.0.1
+          body: |
+            # BinHub Prebuilt Libraries
+
+            ## Build Information
+            - **Version**: v0.0.1
+          files: |
+            ${{ steps.strings.outputs.WORKSPACE_DIR }}/*.tar.xz
+            ${{ steps.strings.outputs.WORKSPACE_DIR }}/*.7z
+          overwrite_files: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
