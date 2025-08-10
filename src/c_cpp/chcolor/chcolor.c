@@ -2,8 +2,13 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#ifdef _WIN32
+#include <time.h>
+
+// 跨平台的高精度时间函数
+#if defined(_WIN32) || defined(_WIN64)
     #include <windows.h>
+#else
+    #include <sys/time.h>
 #endif
 
 #define PROJECT_NAME				"ChangeColor"
@@ -46,6 +51,9 @@ int ChCP(unsigned int newInputCP, unsigned int newOutputCP);
 int StrCmpIgnoreCase(const char *str1, const char *str2);
 void PutStr(const char* Str);
 
+unsigned long long get_microseconds(); // 获取微秒级时间戳
+int generate_random_front_color(void);
+
 int main(int argc,char* argv[]){
     ChCP(65001, 65001);
 
@@ -83,6 +91,8 @@ int main(int argc,char* argv[]){
             ChColor(F_LightCyan, &OldColor);
         }else if(!StrCmpIgnoreCase("lightwhite",argv[1])){
             ChColor(F_LightWhite, &OldColor);
+        }else if(!StrCmpIgnoreCase("random",argv[1])){
+            ChColor(generate_random_front_color(), &OldColor);
         }else if(!strcmp("--help",argv[1])||!strcmp("-?",argv[1])){
             Manual(argv[0]);
         }else if(!strcmp("--list",argv[1])||!strcmp("-l",argv[1])){
@@ -148,7 +158,8 @@ void Manual(char* pro){
     printf("%21s%-15s%s"," ","lightyellow", "指定shell输出前景色为"); ColorPuts(F_LightYellow,"浅黄色", 1);
     printf("%21s%-15s%s"," ","lightpurple", "指定shell输出前景色为"); ColorPuts(F_LightPurple,"浅紫色", 1);
     printf("%21s%-15s%s"," ","lightcyan", "指定shell输出前景色为"); ColorPuts(F_LightCyan,"浅青色", 1);
-    printf("%21s%-15s%s"," ","lightwhite", "指定shell输出前景色为"); ColorPuts(F_LightWhite,"亮白色",2);
+    printf("%21s%-15s%s"," ","lightwhite", "指定shell输出前景色为"); ColorPuts(F_LightWhite,"亮白色", 1);
+    printf("%21s%-15s%s"," ","random", "指定shell输出前景色为"); ColorPuts(generate_random_front_color(),"随机色", 2);
 
     printf("%4s%-13s%s\n", " ", "-?","显示用户帮助");
     printf("%4s%-13s%s\n"," ","-l","列出 Win32 API 颜色和 ANSI/VT100 控制码");
@@ -332,4 +343,36 @@ void PutStr(const char* Str){ // puts()末尾自动换行，printf()不想使用
         else
             break;
     }
+}
+
+// 获取微秒级时间戳
+unsigned long long get_microseconds() {
+#if defined(_WIN32) || defined(_WIN64)
+    FILETIME ft;
+    GetSystemTimeAsFileTime(&ft);
+    unsigned long long tt = ft.dwHighDateTime;
+    tt <<= 32;
+    tt |= ft.dwLowDateTime;
+    tt /= 10;  // 转换为微秒
+    tt -= 11644473600000000ULL;  // 调整为Unix纪元
+    return tt;
+#else
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    return (unsigned long long)tv.tv_sec * 1000000ULL + tv.tv_usec;
+#endif
+}
+
+// 生成指定范围的随机数（ 0x01 ~ 0x0F 和 0x70 ）
+int generate_random_front_color(void){
+    // 使用微秒级时间初始化随机种子
+    unsigned long long seed = get_microseconds();
+    srand((unsigned int)seed);
+    int random_value = rand() % 16; // 生成0-15的随机整数
+    
+    // 映射到目标范围
+    int result;
+    if (random_value < 15) result = random_value + 1;  // 1~15 (0x01~0x0F)
+    else result = 0x70;  // 112 (0x70)
+    return result;
 }
