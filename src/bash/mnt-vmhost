@@ -1,0 +1,3 @@
+#!/bin/bash
+sudo mount -t fuse.vmhgfs-fuse .host:/ /zin/host -o allow_other
+# -o allow_other 表示普通用户也能访问共享目录。

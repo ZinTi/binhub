@@ -8,14 +8,14 @@
 #include <windows.h>
 #endif
 
-#include "color.h"
+#include "binhub.h"
 
 // 当前项目信息
-#define PROJ_NAME			"PwdGen"
+#define PROJ_NAME			"BINHUB PwdGen"
 #ifdef _WIN32
-    #define PROJ_VER			"0.1-WinNT"
+    #define PROJ_VER			"0.0.1-WinNT"
 #else
-    #define PROJ_VER			"0.1-GNU/Linux"
+    #define PROJ_VER			"0.0.1-GNU/Linux"
 #endif
 #define PROJ_YEARS			"2024-2025"
 #define AUTHOR				"Mr. ZENG Lai(Zin)"
@@ -27,24 +27,24 @@
 #define LOWERCASE_LETTERS      "abcdefghijklmnopqrstuvwxyz"
 #define SPECIAL_CHARACTERS     "!@#$\x25^&*()_+{}[]|:;<>,.?/~"
 
-TextColor COLOR_PROMPT_General    =	{COLOR_BRIGHT_WHITE, COLOR_NONE};
-TextColor COLOR_PROMPT_Error      =	{COLOR_RED, COLOR_NONE};
-TextColor COLOR_DIGITS            =	{COLOR_BRIGHT_GREEN, COLOR_NONE};
-TextColor COLOR_UPPERCASE         =	{COLOR_BRIGHT_BLUE, COLOR_NONE};
-TextColor COLOR_LOWERCASE         =	{COLOR_BRIGHT_CYAN, COLOR_NONE};
-TextColor COLOR_SPECIAL           =	{COLOR_BRIGHT_MAGENTA, COLOR_NONE};
-TextColor COLOR_SerialNumber      = {COLOR_BLACK, COLOR_BRIGHT_YELLOW};
+binhub_tcolor_t CLR_PROMPT_General    =	{CLR_BRT_WHITE, CLR_NONE};
+binhub_tcolor_t CLR_PROMPT_Error      =	{CLR_RED, CLR_NONE};
+binhub_tcolor_t CLR_DIGITS            =	{CLR_BRT_GREEN, CLR_NONE};
+binhub_tcolor_t CLR_UPPERCASE         =	{CLR_BRT_BLUE, CLR_NONE};
+binhub_tcolor_t CLR_LOWERCASE         =	{CLR_BRT_CYAN, CLR_NONE};
+binhub_tcolor_t CLR_SPECIAL           =	{CLR_BRT_MAGENTA, CLR_NONE};
+binhub_tcolor_t CLR_SerialNumber      = {CLR_BLACK, CLR_BRT_YELLOW};
 
 // 函数声明
-void About(void);
-void GenerateRandomPwd(char *password, const char *components, int length);
-int ColorPrintPwd(char* password);
-int GetPwdComponents(char* components);
-int GetPwdLength(int* pPwdLength);
-int GetPwdCount(int* pPwdCount);
+void about(void);
+void gen_random_passwd(char* password, const char* components, int length);
+int cprint_passwd(char* password);
+int get_passwd_comp(char* components);
+int get_passwd_len(int* pPwdLength);
+int get_passwd_count(int* pPwdCount);
 
 int main(void) {
-    About();
+    about();
 
     while(1){
         char option;
@@ -60,48 +60,48 @@ int main(void) {
             char* components = (char*)malloc(100);
             
             // 获取密码组成成分、密码长度和密码个数
-            GetPwdComponents(components);
-            GetPwdLength(&password_length);
-            GetPwdCount(&password_count);
+            get_passwd_comp(components);
+            get_passwd_len(&password_length);
+            get_passwd_count(&password_count);
             
             // 生成密码
             for (int i = 0; i < password_count; i++) {
                 char password[password_length + 1];
-                GenerateRandomPwd(password, components, password_length);
-                ColorPrintf(COLOR_SerialNumber, "%02d", i + 1); // 序号
-                ColorPrintPwd(password);
+                gen_random_passwd(password, components, password_length);
+                binhub_cprintf(CLR_SerialNumber, "%02d", i + 1); // 序号
+                cprint_passwd(password);
             }
             if(components) free(components);
             printf("End\n");
         }else if(option == 'n' || option == 'N'){
             break;
-        }else{
-            ColorPrintf(COLOR_PROMPT_Error, "Invalid option! Enter 'y' or 'n', please!\n");
+        }else {
+            binhub_cprintf(CLR_PROMPT_Error, "Invalid option! Enter 'y' or 'n', please!\n");
         }
     }
 
     return 0;
 }
 
-void About(void){
+void about(void){
 	printf("%s version %s (compiled %s, %s)\n", PROJ_NAME, PROJ_VER, __TIME__, __DATE__);
 	printf("Copyleft (c) %s %s. Licensed under the GNU General Public License.\n%s\n\n", PROJ_YEARS, AUTHOR, CONTACT);
 }
 
-int ColorPrintPwd(char* password){
+int cprint_passwd(char* password){
     printf("\t");
     for(int i=0 ; ; i++){
         if(*(password+i) >= '0' && *(password+i) <= '9'){  // 0-9数字
-            ColorPrintf(COLOR_DIGITS, "%c",*(password+i));
+            binhub_cprintf(CLR_DIGITS, "%c",*(password+i));
         }else if(*(password+i) >= 'A' && *(password+i) <= 'Z'){ //A-Z大写字母
-            ColorPrintf(COLOR_UPPERCASE, "%c",*(password+i));
+            binhub_cprintf(CLR_UPPERCASE, "%c",*(password+i));
         }else if(*(password+i) >= 'a' && *(password+i) <= 'z'){ //a-z小写字母
-            ColorPrintf(COLOR_LOWERCASE, "%c",*(password+i));
+            binhub_cprintf(CLR_LOWERCASE, "%c",*(password+i));
         }else if(*(password+i) == '\0'){ //字符串结束符
             break;
-        }else{ //其他字符
+        }else { //其他字符
             //*(password+i) > '9' && *(password+i) < 'A' || *(password+i) < '0' || *(password+i) > 'Z' && *(password+i) < 'a' || *(password+i) > 'z'
-            ColorPrintf(COLOR_SPECIAL, "%c",*(password+i));
+            binhub_cprintf(CLR_SPECIAL, "%c",*(password+i));
         }
     }
     putchar('\n');
@@ -109,54 +109,54 @@ int ColorPrintPwd(char* password){
     return 0;
 }
 
-int GetPwdComponents(char* components){
-    ColorPrintf(COLOR_DIGITS, "D/d\tDigits( "DIGITS" )\n");
-    ColorPrintf(COLOR_UPPERCASE, "U/u\tUppercase letters( "UPPERCASE_LETTERS" )\n");
-    ColorPrintf(COLOR_LOWERCASE, "L/l\tLowercase letters( "LOWERCASE_LETTERS" )\n");
-    ColorPrintf(COLOR_SPECIAL, "S/s\tSpecial characters( "SPECIAL_CHARACTERS" )\n");
-    ColorPrintf(COLOR_PROMPT_General, "Enter password components > ");
-    if(scanf("%s", components));
+int get_passwd_comp(char* components){
+    binhub_cprintf(CLR_DIGITS, "D/d\tDigits( "DIGITS" )\n");
+    binhub_cprintf(CLR_UPPERCASE, "U/u\tUppercase letters( "UPPERCASE_LETTERS" )\n");
+    binhub_cprintf(CLR_LOWERCASE, "L/l\tLowercase letters( "LOWERCASE_LETTERS" )\n");
+    binhub_cprintf(CLR_SPECIAL, "S/s\tSpecial characters( "SPECIAL_CHARACTERS" )\n");
+    binhub_cprintf(CLR_PROMPT_General, "Enter password components > ");
+    if(scanf("%s", components)){};
     // 合法性显示
     char* theUnderline = (char*)malloc(sizeof(components));
     for(int i=0 ; ; i++){
         if(*(components+i) == 'D' || *(components+i) == 'd'){
-            ColorPrintf(COLOR_DIGITS, "%c",*(components+i));
+            binhub_cprintf(CLR_DIGITS, "%c",*(components+i));
             *(theUnderline+i) = ' ';
         }else if(*(components+i) == 'U' || *(components+i) == 'u'){
-            ColorPrintf(COLOR_UPPERCASE, "%c",*(components+i));
+            binhub_cprintf(CLR_UPPERCASE, "%c",*(components+i));
             *(theUnderline+i) = ' ';
         }else if(*(components+i) == 'S' || *(components+i) == 's'){
-            ColorPrintf(COLOR_SPECIAL, "%c",*(components+i));
+            binhub_cprintf(CLR_SPECIAL, "%c",*(components+i));
             *(theUnderline+i) = ' ';
         }else if(*(components+i) == 'L' || *(components+i) == 'l'){
-            ColorPrintf(COLOR_LOWERCASE, "%c",*(components+i));
+            binhub_cprintf(CLR_LOWERCASE, "%c",*(components+i));
             *(theUnderline+i) = ' ';
         }else if(*(components+i) == '\0'){
             *(theUnderline+i) = '\0';
             break;
-        }else{
-            ColorPrintf(COLOR_PROMPT_Error, "%c",*(components+i));
+        }else {
+            binhub_cprintf(CLR_PROMPT_Error, "%c",*(components+i));
             *(theUnderline+i) = '^';
         }
     }
-    ColorPrintf(COLOR_PROMPT_Error, "\n%s\n", theUnderline);
+    binhub_cprintf(CLR_PROMPT_Error, "\n%s\n", theUnderline);
 
     return 0;
 }
 
-int GetPwdLength(int* pPwdLength){
-    ColorPrintf(COLOR_PROMPT_General, "Enter password length > ");
-    if(scanf("%d", pPwdLength));
+int get_passwd_len(int* pPwdLength){
+    binhub_cprintf(CLR_PROMPT_General, "Enter password length > ");
+    if(scanf("%d", pPwdLength)){};
     return 0;
 }
 
-int GetPwdCount(int* pPwdCount){
-    ColorPrintf(COLOR_PROMPT_General, "Enter number of passwords to generate > ");
-    if(scanf("%d", pPwdCount));
+int get_passwd_count(int* pPwdCount){
+    binhub_cprintf(CLR_PROMPT_General, "Enter number of passwords to generate > ");
+    if(scanf("%d", pPwdCount)){};
     return 0;
 }
 
-void GenerateRandomPwd(char *password, const char *components, int length) {
+void gen_random_passwd(char* password, const char* components, int length) {
     int components_length = 0;
     int x1[4] = {0,0,0,0};
     if (strchr(components, 'D') != NULL || strchr(components, 'd') != NULL){
@@ -176,7 +176,7 @@ void GenerateRandomPwd(char *password, const char *components, int length) {
         x1[3] = 1;
     }
     for (int i = 0; i < length; i++) {
-        int index = rand() % components_length;
+        size_t index = rand() % components_length;
         if (x1[0] == 1) {
             if (index < strlen(DIGITS)) {
                 password[i] = DIGITS[index];

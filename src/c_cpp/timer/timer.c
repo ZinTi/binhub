@@ -2,16 +2,21 @@
 #include <time.h>
 #include <windows.h>               //Sleep(ms)
 #include <conio.h>                 //kbhit()/_kbhit(),getch()
+#include "binhub.h"
 
 #define true        1
 #define false       0
 
-void SetConsoleCursorVisible(short visible);         // 设置控制台光标可见性的函数
-int ColorPrintf(unsigned short color, const char* format, ...);
-void SystemBeep();
+binhub_tcolor_t color_ce = {CLR_BRT_YELLOW, CLR_BRT_RED};
+binhub_tcolor_t color_ed = {CLR_BRT_MAGENTA, CLR_BRT_YELLOW};
+
+void set_cursor_visible(short visible);         // 设置控制台光标可见性的函数
+void system_beep();
 
 int main(void){
-	SetConsoleCP(65001) && SetConsoleOutputCP(65001);
+#ifdef _WIN32 // Linux 默认
+    binhub_setenc(ENCODING_UTF8);
+#endif
     //动态计时参数（打印值）
     unsigned int hour = 0, min = 0, sec = 0;
     //默认值（设定的计时参数）
@@ -21,13 +26,11 @@ int main(void){
     char key;
     int pause_flag = 1;            //暂停标志
     int menu_flag = 1;             //菜单打印标志
-    while(1)
-    {
+    while(1){
         /**************** 菜单打印 ****************/
-        if(menu_flag == 1)
-        {
+        if(menu_flag == 1){
             menu_flag = 0;
-            system("cls");          //Windows系统清屏命令
+            BINHUB_CLEAR_SCREEN;
             printf("═════════════════════════════════\n"); //菜单
             if(hour_def || min_def || sec_def){
                 printf("│\t倒计时时间：%02d:%02d:%02d\t│\n", hour_def, min_def, sec_def);
@@ -36,28 +39,25 @@ int main(void){
                 printf("|\t未设置计时时间\t\t|\n");
             printf("│ S:设置 空格:开始/暂停 Q:退出\t│\n");
             printf("═════════════════════════════════\n");
-            if(pause_flag == 0)
-            {
-                ColorPrintf(0xED, "计时结束\n");
-                SystemBeep();
+            if(pause_flag == 0) {
+                binhub_cprintf(color_ed, "计时结束"); putchar('\n');
+                system_beep();
                 pause_flag = 1;          //停止计时
             }
         }
 
         /**************** 键盘按键扫描+操作 ****************/
-        SetConsoleCursorVisible(false);
+        set_cursor_visible(false);
         key = 0;
         if(_kbhit())                      //检测到按键按下
             key = getch();                //读取按键
-        switch(key)
-        {
+        switch(key) {
             case 's':                     //按s/S设置计时时间
             case 'S':
-                SetConsoleCursorVisible(true);
+                set_cursor_visible(true);
                 printf("请设置计时时间——时 分 秒\n");
                 scanf("%d %d %d", &hour_def, &min_def, &sec_def);
-                if(hour_def > 24 || min_def > 59 || sec_def > 59)
-                {
+                if(hour_def > 24 || min_def > 59 || sec_def > 59) {
                     //printf("时间设置失败\n");
                     hour_def = min_def = sec_def = 0; //重置时间
                 }
@@ -65,21 +65,17 @@ int main(void){
                 menu_flag = 1;              //打印菜单
                 break;
             case ' ':                       //按空格键开始/暂停计时
-                SetConsoleCursorVisible(false);
-                if(hour_def || min_def || sec_def)   //如果时间有效
-                {
-                    if(pause_flag)
-                    {
+                set_cursor_visible(false);
+                if(hour_def || min_def || sec_def) { //如果时间有效
+                    if(pause_flag){
                         pause_flag = 0;     //开始计时或继续计时
-                        if(!hour && !min && !sec) //计数值为0
-                        {
+                        if(!hour && !min && !sec) { //计数值为0
                             hour = hour_def;   //读取上次设置的时间
                             min = min_def;
                             sec = sec_def;
-                            ColorPrintf(0xCE, "%02d:%02d:%02d\r", hour, min, sec); //打印初始时间
+                            binhub_cprintf(color_ce, "%02d:%02d:%02d\r", hour, min, sec); //打印初始时间
                         }
-                    }
-                    else
+                    } else
                         pause_flag = 1;     //暂停计时
                     time(&time_sec);        //获取当前秒数（1970-1-1 00:00:00到现在）
                     old_sec = time_sec;     //更新旧的秒数
@@ -92,23 +88,20 @@ int main(void){
 
         /**************** 计时操作 ****************/
         time(&time_sec);              //获取秒数保存到time_t变量
-        if(pause_flag == 0 && old_sec != time_sec)
-        {
+        if(pause_flag == 0 && old_sec != time_sec){
             old_sec = time_sec;       //更新旧的秒数
             if(sec > 0)
                 sec--;                //计时秒数减1
-            else
-            {
+            else{
                 sec = 59;             //如果原秒数为0，则变为59
                 if(min > 0)
                     min--;            //计时分钟减1
-                else
-                {
+                else {
                     min = 59;         //如果分钟数为0，则变为59
                     hour--;           //计时小时数减1
                 }
             }
-            ColorPrintf(0xCE, "%02d:%02d:%02d\r", hour, min, sec);
+            binhub_cprintf(color_ce, "%02d:%02d:%02d\r", hour, min, sec);
 
             if(!hour && !min && !sec) //计时结束
                 menu_flag = 1;        //打印菜单
@@ -117,7 +110,7 @@ int main(void){
     return 0;
 }
 
-void SetConsoleCursorVisible(short visible) {
+void set_cursor_visible(short visible) {
     HANDLE hOut = GetStdHandle(STD_OUTPUT_HANDLE);  // 获取标准输出句柄
     CONSOLE_CURSOR_INFO cursorInfo;
     GetConsoleCursorInfo(hOut, &cursorInfo);        // 修改可见性设置
@@ -125,31 +118,7 @@ void SetConsoleCursorVisible(short visible) {
     SetConsoleCursorInfo(hOut, &cursorInfo);        // 应用新设置
 }
 
-void ChangeConsoleTextColor(WORD color){
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	SetConsoleTextAttribute(hConsole, color);
-}
-
-int ColorPrintf(unsigned short color, const char* format, ...){
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	unsigned short currentAttr;
-	if(GetConsoleScreenBufferInfo(hConsole, &csbi)){
-		currentAttr = csbi.wAttributes;
-	}else{
-		puts("ERROR: Failed to get console screen buffer information.");
-		currentAttr = 0x07;
-	}
-	SetConsoleTextAttribute(hConsole, color);
-    va_list args;
-    va_start(args, format);
-    int ret = vprintf(format, args);
-    va_end(args);
-	SetConsoleTextAttribute(hConsole, currentAttr); // 恢复原属性
-    return ret;
-}
-
-void SystemBeep() {
+void system_beep() {
     // 方法1：尝试控制台响铃（适用于大多数终端）
     printf("\a");   // \a 是ASCII的响铃字符
     fflush(stdout); // 确保立即输出

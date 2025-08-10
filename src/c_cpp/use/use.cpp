@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cstring>
 #include <cstdlib>
 
 #ifdef _WIN32
@@ -9,9 +10,9 @@
 #define HOME_PATH_VAR				"BINHUB_HOME"
 
 #ifdef _WIN32
-	#define USE_EXECUTABLE_PATH		"\\bin\\winnt\\subbin\\"
+	#define USE_EXECUTABLE_PATH		"\\bin\\subbin\\"
 #else
-	#define USE_EXECUTABLE_PATH		"/bin/linux/subbin/"
+	#define USE_EXECUTABLE_PATH		"/bin/subbin/"
 #endif
 
 int main(int argc,char* argv[]){
@@ -25,7 +26,7 @@ int main(int argc,char* argv[]){
 	full_comand_and_arg.append(USE_EXECUTABLE_PATH);	// 拼接完整目标路径
 
 	if(argc >= 2){
-		if(argv[1] == "-l"){
+		if(!strcmp(argv[1], "-l")){
 			#ifdef _WIN32
 				std::string cmd_tree_dir = "tree /f " + full_comand_and_arg;
 			#else
@@ -40,13 +41,13 @@ int main(int argc,char* argv[]){
 				full_comand_and_arg.append(" \x22");	// x22 即 '"'
 				full_comand_and_arg += argv[i];
 				full_comand_and_arg.push_back('\x22');
-			}else{
+			}else {
 				full_comand_and_arg += argv[i];	// 第一个参数直接追加（程序完成路径名）
 			}
 		}
 		system(full_comand_and_arg.c_str());		// 运行命令（原样传递参数）
 		
-	}else{
+	}else {
 		std::cerr << "Insufficient parameters!" << std::endl;
 		std::cout << "[USAGE]\n";
 		std::cout << argv[0] << " <executable> [options...]    Run the executable in the directory `" << full_comand_and_arg << "`\n";

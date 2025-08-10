@@ -1,16 +1,15 @@
 ascii.exe						打印 ACSII 字符表、查询 ASCII 字符数值
 baseconvert.exe					进制转换
 binarytree.exe					二叉树节点计算程序
-binhub.exe						打印 BINHUB_HOME 路径
 binhubmanual.bat				读取使用手册
 chcolor.exe						修改终端颜色（仅Windows，类似于cmd的color命令）
 copyleft.exe					在文本文件顶部增加版权说明模板
-crun.exe						快速编译并运行C/CPP程序、C模拟REPL
-digest.exe						计算字符串的散列值（Hash）
+cpro.exe						快速编译并运行C/CPP程序、C模拟REPL
+cvtcolor.exe					转换颜色格式（RGB HexStr转换 RGB 分量）
 event.bat
-hex2dec.exe						RGB16进制转换RGB分量
 ifconfig.bat
-listcop.exe						打印“C语言运算符优先级表格”
+libbinhub.dll					BinHub的动态链接库
+digest.exe						计算字符串的散列值（Hash）
 lnk-cmd.lnk
 lnk-psh.lnk
 md2sum.bat
@@ -22,11 +21,10 @@ pwdgen.exe						随机密码生成器
 reboot.bat
 restartexplorer.bat
 rm.bat
-run.exe							同crun
 sandbox.bat
 selfdel.exe						删除文件和目录
-setfileenc.exe					转换GBK/UTF-8中文
-setfiletime.exe					修改文件时间戳
+setenc.exe					转换GBK/UTF-8中文
+setts.exe					修改文件时间戳
 sha1sum.bat
 sha256sum.bat
 sha384sum.bat
@@ -37,7 +35,7 @@ tellme.exe						tellme time [-l]（告诉我系统时间）
 timer.exe						一个命令行倒计时器
 touch.bat
 use.exe							使用子目录subbin/下面的程序
-viewfile.exe					查看文本文件内容（相当于cat命令，但会简单判断文本是UTF-8还是GBK）
+viewfile.exe					查看文本文件内容（相当于cat命令，但会简单判断文本是 UTF-8还是GBK）
 winmgr.bat
 
 subbin/Win7TurnOnRemote.exe			快速在具有还原卡的Windows7主机上启用远程桌面功能、设置账号密码、并保存ip地址至文本文件

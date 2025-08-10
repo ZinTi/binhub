@@ -6,55 +6,57 @@
 #include <winsock2.h>
 #include <windows.h>
 
-#pragma comment(lib, "ws2_32.lib") // 链接Winsock库
+#include "binhub.h"
 
-#define PROJECT_NAME            "TellMe"
-#define PROJECT_VERSION         "0.1-WinNT"
+// #pragma comment(lib, "ws2_32.lib") // 链接Winsock库
+
+#define PROJECT_NAME            "BINHUB TellMe"
+#define PROJECT_VERSION         "0.0.1-WinNT"
 
 #define MAX_LEN_STRING          50
 #define NTP_TIMESTAMP_DELTA     2208988800ull // 1970年到1900年之间的秒数
 
-void ShowManual(const char* bin_name);
-void ShowCurrentDateTime(short int loop);
-void Get_NTP_time(const char *server);
+binhub_tcolor_t color_ce = {CLR_BRT_YELLOW, CLR_BRT_RED};
 
-int ColorPrintf(unsigned short color, const char* format, ...);
-int StrCmpIgnoreCase(const char *str1, const char *str2);
-int StrNCmpIgnoreCase(const char *str1, const char *str2, unsigned long long n);
+void show_manual(const char* bin_name);
+void show_now(short int loop);
+void get_ntp_time(const char* server);
 
 int main(int argc, char* argv[]) {
-    SetConsoleCP(65001) && SetConsoleOutputCP(65001);
+#ifdef _WIN32 // Linux 默认
+    binhub_setenc(ENCODING_UTF8);
+#endif
     if (argc < 2) {
         printf("What do you want to know?");
 
     } else {
-        if (!StrCmpIgnoreCase(argv[1], "time")) {
+        if (!binhub_strcasecmp(argv[1], "time")) {
             if (argc >= 3 && !strcmp(argv[2], "-l")) {
-                ShowCurrentDateTime(1);
+                show_now(1);
             } else {
-                ShowCurrentDateTime(0);
+                show_now(0);
             }
-        } else if (!StrCmpIgnoreCase(argv[1], "ntpTime")) {
+        } else if (!binhub_strcasecmp(argv[1], "ntpTime")) {
             // 从time.windows.com获取NTP时间，或者使用用户提供的NTP服务器地址
             const char* ntp_server = (argc >= 3) ? argv[2] : "time.windows.com";
             printf("从 %s 获取NTP时间\n", ntp_server);
-            Get_NTP_time(ntp_server);
+            get_ntp_time(ntp_server);
         } else {
             printf("I don't understand what you're saying.\n");
-            ShowManual(argv[0]);
+            show_manual(argv[0]);
         }
     }
 
     return 0;
 }
 
-void ShowManual(const char* bin_name){
+void show_manual(const char* bin_name){
     printf("[ USAGE ]\n");
     printf("    %s time [-l]\n", bin_name);
     printf("    %s ntptime [授时服务器域名 | 授时服务器ip地址]\n", bin_name);
 }
 
-void ShowCurrentDateTime(short int loop) {
+void show_now(short int loop) {
     HANDLE hOut = NULL; //定义句柄变量
     CONSOLE_CURSOR_INFO cursorInfo; //光标信息变量
     hOut = GetStdHandle(STD_OUTPUT_HANDLE); //获取标准输出句柄
@@ -72,7 +74,7 @@ void ShowCurrentDateTime(short int loop) {
         strcpy(nowtimestr, ctime(&now_time));
         nowtimestr[strlen(nowtimestr)-1] = '\0'; // 去掉最后一个换行符
 
-        ColorPrintf(0xCE, nowtimestr);
+        binhub_cprintf(color_ce, nowtimestr);
         
         if (loop) {
             Sleep(1000); // 延时1秒
@@ -85,8 +87,8 @@ void ShowCurrentDateTime(short int loop) {
     CloseHandle(hOut);
 }
 
-void Get_NTP_time(const char *server) {
-    //  获取NTP时间的同时运行LoadLoop("Loading")以目的是告诉用户当前程序还在运行中，当获取到数据后停止运行LoadLoop("Loading")并输出数据。
+void get_ntp_time(const char* server) {
+    //  获取 NTP 时间, load_loop("Loading"), 当获取到数据后停止运行load_loop("Loading")并输出数据
 
     WSADATA wsaData;
     SOCKET sockfd;
@@ -149,64 +151,9 @@ void Get_NTP_time(const char *server) {
 
     // 打印时间
     printf("NTP 时间：");
-    ColorPrintf(0xCE, ctime(&unix_time));
+    binhub_cprintf(color_ce, ctime(&unix_time));
 
     // 清理
     closesocket(sockfd);
     WSACleanup();
-}
-
-int ColorPrintf(unsigned short color, const char* format, ...){
-	HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
-	unsigned short currentAttr;
-	if(GetConsoleScreenBufferInfo(hConsole, &csbi)){
-		currentAttr = csbi.wAttributes;
-	}else{
-		puts("ERROR: Failed to get console screen buffer information.");
-		currentAttr = 0x07;
-	}
-	SetConsoleTextAttribute(hConsole, color);
-    va_list args;
-    va_start(args, format);
-    int ret = vprintf(format, args);
-    va_end(args);
-	SetConsoleTextAttribute(hConsole, currentAttr); // 恢复原属性
-    return ret;
-}
-
-// 比较两个字符串是否相同，忽略大小写
-int StrCmpIgnoreCase(const char *str1, const char *str2) {
-    while (*str1 && *str2) {
-        char c1 = (*str1 >= 'A' && *str1 <= 'Z') ? (*str1 - 'A' + 'a') : *str1;
-        char c2 = (*str2 >= 'A' && *str2 <= 'Z') ? (*str2 - 'A' + 'a') : *str2;
-        if (c1 != c2) {
-            return c1 - c2; // 返回字符差值，类似于strcmp
-        }
-        str1++;
-        str2++;
-    }
-    return *str1 - *str2; // 考虑到字符串长度不同的情况
-}
-
-// 比较两个字符串的前n个字符是否相同，忽略大小写
-int StrNCmpIgnoreCase(const char *str1, const char *str2, unsigned long long n) {
-    while (n && *str1 && *str2) {
-        char c1 = (*str1 >= 'A' && *str1 <= 'Z') ? (*str1 - 'A' + 'a') : *str1;
-        char c2 = (*str2 >= 'A' && *str2 <= 'Z') ? (*str2 - 'A' + 'a') : *str2;
-        if (c1 != c2) {
-            return c1 - c2; // 返回字符差值
-        }
-        str1++;
-        str2++;
-        n--;
-    }
-
-    // 如果 n 为 0 或两个字符串在前 n 个字符都相等，则返回 0
-    if (n == 0) {
-        return 0;
-    }
-    
-    // 处理字符串长度不同的情况
-    return (*str1) ? 1 : ((*str2) ? -1 : 0);
 }

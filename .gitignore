@@ -1,0 +1,29 @@
+# gitignore file for binhub project
+
+# 忽略所有目录
+build/
+install/
+bin/
+
+# 忽略以下扩展名的文件
+*.o
+*.obj
+*.tmp
+*.out
+*.exe
+*.dll
+*.dll.a
+*.so
+*.a
+*.lib
+*.tar.gz
+*.zip
+*.7z
+*.db
+
+# 编辑器/IDE 文件
+.idea/
+.vscode/
+*.swp
+
+
