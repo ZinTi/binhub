@@ -90,3 +90,4 @@ binhub/
 
 ## 🔗 五、其他
 - 项目地址 https://github.com/ZinTi/binhub
+- GPLv3 许可证
