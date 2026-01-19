@@ -127,6 +127,13 @@ jobs:
             dir_name=${dir_name%/}
             echo "找到匹配的目录: ${dir_name}"
 
+            # MSVC 生成目录不同，需特别处理
+            if [[ "${{ matrix.c_compiler }}" == "cl" ]]; then
+              mv ${dir_name}/Release/setenv.exe ${dir_name}/setenv.exe && rm -rf ${dir_name}/Release
+              mv ${dir_name}/bin/Release/* ${dir_name}/bin/ && rm -rf ${dir_name}/bin/Release
+              mv ${dir_name}/lib/Release/* ${dir_name}/lib/ && rm -rf ${dir_name}/lib/Release
+            fi
+
             if [ "$RUNNER_OS" == "Windows" ]; then
               7z a -r ${dir_name}.7z ${dir_name}
             else

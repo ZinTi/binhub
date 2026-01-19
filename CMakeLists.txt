@@ -34,7 +34,7 @@ set(LIB_OPENSSL_ROOT "${CMAKE_SOURCE_DIR}/third_party/openssl")
 
 # 引入子项目
 # 0. 库
-add_subdirectory(libraries)
+add_subdirectory(lib)
 
 # 1. 可执行程序（Windows && Linux）
 add_subdirectory(src/c_cpp/ascii)

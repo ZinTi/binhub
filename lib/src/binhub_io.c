@@ -523,3 +523,12 @@ void load_loop(const char* text, int style){
 #else
 #endif
 }
+
+bool binhub_clear_screen(){
+#if defined(_WIN32) || defined(_WIN64)
+    // 不使用 Windows API 是为了保持兼容性
+    return system("cls") == 0;
+#else
+    return system("clear") == 0;
+#endif
+}

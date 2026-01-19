@@ -7,6 +7,7 @@
 #define BINHUB_MACRO_H
 
 #include <stdint.h>
+#include "binhub_io.h" // binhub_clear_screen()
 
 /**
  * @brief 打印环境变量
@@ -40,13 +41,14 @@
  * @brief 清屏
  * @details BINHUB_CLEAR_SCREEN 清屏
  */
-#ifdef _WIN32
-    #define BINHUB_CLEAR_SCREEN system("cls")
-#elif defined(__linux__) || defined(__APPLE__)
-    #define BINHUB_CLEAR_SCREEN system("clear")
-#else
-    #define BINHUB_CLEAR_SCREEN
-#endif
+// #ifdef _WIN32
+//     #define BINHUB_CLEAR_SCREEN system("cls")
+// #elif defined(__linux__) || defined(__APPLE__)
+//     #define BINHUB_CLEAR_SCREEN system("clear")
+// #else
+//     #define BINHUB_CLEAR_SCREEN
+// #endif
+#define BINHUB_CLEAR_SCREEN binhub_clear_screen()
 
 /**
  * @brief 带文件和行号的调试日志

@@ -147,6 +147,12 @@ int binhub_setcp_auto(const char* filename);
  */
 void load_loop(const char* text, int style);
 
+/**
+ * @brief 清屏（包括可视区域 viewport，和滚动缓冲区 scrollback buffer）
+ * @return bool 成功返回true，失败返回false
+ */
+bool binhub_clear_screen();
+
 #ifdef __cplusplus
 }
 #endif

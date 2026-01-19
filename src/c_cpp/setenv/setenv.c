@@ -41,6 +41,7 @@ void ManagerRun(LPCSTR exe, LPCSTR param) { //非管理员身份运行将跳出U
     ShExecInfo.nShow = SW_SHOW;
     ShExecInfo.hInstApp = NULL;
     BOOL ret = ShellExecuteEx(&ShExecInfo);
+    (void)ret; // 忽略ShellExecuteEx的返回值
     CloseHandle(ShExecInfo.hProcess); //杀掉当前线程
     return;
 }
@@ -119,14 +120,14 @@ void ModiPath_RmVal(const char* rmStr) {
 		int len = strlen(rmStr); //  "\\"算一个字符
         size_t newLength = strlen(currentValue) + 1;
         char* addr = strstr(currentValue, rmStr); // 只保留搜索到的字符串及其后边的
-        int begin = addr - currentValue;
-		int end = begin + len;
+        size_t begin = addr - currentValue;
+		size_t end = begin + len;
         char* newValue = (char*)malloc(newLength-len+1);
         if (newValue == NULL) {
             fprintf(stderr, "Memory allocation failed!\n");
             return;
         }
-		for(int i = 0, j=0;i<newLength;i++){
+		for(size_t i = 0, j=0;i<newLength;i++){
 			if(i<begin||i>=end){
 				newValue[j] = currentValue[i];
 				j++;

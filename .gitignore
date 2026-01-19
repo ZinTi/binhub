@@ -5,7 +5,7 @@ build/
 install/
 bin/
 binhub-v*/
-third_party/
+third_party/*
 
 # 忽略以下扩展名的文件
 *.o

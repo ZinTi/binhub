@@ -44,7 +44,7 @@ int main(int argc, char* argv[]) {
 
 void del_dir(const char* path) {
     WIN32_FIND_DATA findFileData;
-    char search_path[MAX_PATH];
+    char search_path[MAX_PATH * 2];
     sprintf(search_path, "%s\\*", path);
 
     HANDLE hFind = FindFirstFile(search_path, &findFileData);
