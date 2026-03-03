@@ -1,0 +1,3 @@
+#!/bin/env bash
+echo '(rvgcc is aliased to `riscv64-linux-gnu-gcc `)'
+riscv64-linux-gnu-gcc "$@"
