@@ -29,6 +29,22 @@ else()
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_SOURCE_DIR}/${INSTALL_ROOT_DIR}/unknown)
 endif()
 
+# Linux 全局 RPATH 设置
+# 相当于 -Wl,-rpath,'$ORIGIN',--enable-new-dtags 参数
+if(UNIX)
+    set(CMAKE_SKIP_BUILD_RPATH FALSE)               # 不跳过构建 RPATH
+    set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)      # 构建时不使用安装 RPATH
+    set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)   # 安装时不包含链接路径
+
+    # 设置 RPATH
+    set(CMAKE_INSTALL_RPATH "$ORIGIN")
+    set(CMAKE_BUILD_RPATH "$ORIGIN")
+
+    # 添加 --enable-new-dtags
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -Wl,--enable-new-dtags")
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -Wl,--enable-new-dtags")
+endif()
+
 # 设置第三方库路径
 set(LIB_OPENSSL_ROOT "${CMAKE_SOURCE_DIR}/third_party/openssl")
 
